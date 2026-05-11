@@ -6,7 +6,6 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
 from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
 from langchain_core.prompts import PromptTemplate
-from google.colab import userdata # Import userdata
 
 # --- Configuration ---
 st.set_page_config(page_title="YouTube RAG Assistant", layout="wide")
