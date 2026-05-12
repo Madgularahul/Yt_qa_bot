@@ -11,7 +11,6 @@ from langchain_core.prompts import PromptTemplate
 st.set_page_config(page_title="YouTube RAG Assistant", layout="wide")
 st.title("📺 YouTube Video Q&A Assistant")
 
-# Securely get your API Key from Colab userdata
 # api_key = "aavvAIzaSyBkaIy6DOUyZ1puRpEvvVcMyKcyOSRBPBA"
 api_key = st.secrets["GOOGLE_API_KEY"]
 
@@ -21,7 +20,6 @@ def get_video_id(url):
     match = re.search(pattern, url)
     return match.group(1) if match else None
 
-# --- App Logic ---
 with st.sidebar:
     st.header("Setup")
     video_url = st.text_input("Enter YouTube Video URL:")
@@ -33,23 +31,23 @@ if process_button and video_url:
     if video_id:
         with st.spinner("Fetching transcript and building index..."):
             try:
-                # 1. Extraction
+                # Extraction
                 ytt = YouTubeTranscriptApi()
                 transcript_obj = ytt.fetch(video_id=video_id, languages=['en'])
                 final_transcript = " ".join([s.text for s in transcript_obj])
 
-                # 2. Document Chunking
+                # Document Chunking
                 splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
                 docs = splitter.create_documents(texts=[final_transcript])
 
-                # 3. Vector Store
+                # Vector Store
                 embeddings = GoogleGenerativeAIEmbeddings(
                     model="models/gemini-embedding-001",
                     google_api_key=api_key
                 )
                 vector_store = FAISS.from_documents(documents=docs, embedding=embeddings)
 
-                # Save to session state so it persists across reruns
+                # session saving
                 st.session_state.vector_store = vector_store
                 st.session_state.video_processed = True
                 st.success("Video processed successfully!")
@@ -59,7 +57,7 @@ if process_button and video_url:
     else:
         st.error("Invalid YouTube URL.")
 
-# --- Q&A Section ---
+# QA
 st.divider()
 
 if "video_processed" in st.session_state:
@@ -67,12 +65,12 @@ if "video_processed" in st.session_state:
 
     if user_question:
         with st.spinner("Generating answer..."):
-            # 4. Retrieval
+            # Retrieval
             retriever = st.session_state.vector_store.as_retriever()
             results = retriever.invoke(user_question)
             context_text = "\n\n".join([doc.page_content for doc in results])
 
-            # 5. Generation
+            # Generation
             llm = ChatGoogleGenerativeAI(
                 model='models/gemini-flash-latest',
                 google_api_key=api_key
@@ -93,7 +91,7 @@ if "video_processed" in st.session_state:
             response = llm.invoke(prompt)
 
             if isinstance(response.content, list):
-                # Extract only the actual text value, ignoring the "extras" dictionary
+                # trying to only print the text in response.content
                 text_only = "".join(block.get("text", "") for block in response.content if block.get("type") == "text")
                 st.write(text_only)
             else:
