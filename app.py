@@ -12,7 +12,7 @@ st.set_page_config(page_title="YouTube RAG Assistant", layout="wide")
 st.title("📺 YouTube Video Q&A Assistant")
 
 # api_key = "aavvAIzaSyBkaIy6DOUyZ1puRpEvvVcMyKcyOSRBPBA"
-api_key = st.secrets["GOOGLE_API_KEY"]
+api_key = AIzaSyBkaIy6DOUyZ1puRpEvvVcMyKcyOSRBPBA#st.secrets["GOOGLE_API_KEY"]
 
 def get_video_id(url):
     """Extracts the video ID from various YouTube URL formats."""
